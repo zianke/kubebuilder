@@ -474,6 +474,7 @@
   packages = [
     "discovery",
     "discovery/fake",
+    "dynamic",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1alpha1",
@@ -645,6 +646,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9c7ea8f6441e0dd5f1368a18de8a19d2b62b23127038b4ad7d9ffdb70639ba80"
+  inputs-digest = "31fa988089e365ca737e64275be055689b3ad132f0b265e17fd5306de2d9777c"
   solver-name = "gps-cdcl"
   solver-version = 1
