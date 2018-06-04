@@ -1,44 +1,49 @@
 package main
 
 import (
-	"log"
 	"os"
 	"flag"
 
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/tools/clientcmd"
+	klog "github.com/kubernetes-sigs/kubebuilder/pkg/log"
 	kcache "k8s.io/client-go/tools/cache" // $cashmoney
 	corev1 "k8s.io/api/core/v1"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/informer"
-	"k8s.io/client-go/kubernetes/scheme"
 )
 
 func main() {
 	flag.Parse()
+
+	/*
 	cfg, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
 	if err != nil {
-		log.Fatalf("shit: %v", err)
+		log.Error(err, "could not initialize kubernetes client")
+		os.Exit(1)
 	}
-
+	
+	// NB: this should really only be done once for improved startup time
+	
 	discoClient := discovery.NewDiscoveryClientForConfigOrDie(cfg)
 	groupReses, err := discovery.GetAPIGroupResources(discoClient)
 	if err != nil {
-		log.Fatalf("gaaaaah: %v", err)
+		log.Error(err, "could not fetch API discovery information") 
+		os.Exit(1)
 	}
-	discoMapper := discovery.NewRESTMapper(groupReses, dynamic.VersionInterfaces)
+	discoMapper := discovery.NewRESTMapper(groupReses, dynamic.VersionInterfaces)*/
 
-	cache := informer.NewInformerCache(discoMapper, cfg, scheme.Scheme)
+	log := klog.BaseLogger().WithName("main")
+
+	cache := &informer.IndexedCache{}
 	podInformer, err := cache.InformerFor(&corev1.Pod{})
 	if err != nil {
-		log.Fatalf("darnit: %v", err)
+		log.Error(err, "could not initialize informer", "kind", "Pod")
+		os.Exit(1)
 	}
 
 	go cache.Start(make(chan struct{}))
 
 	podInformer.AddEventHandler(kcache.ResourceEventHandlerFuncs{
 		UpdateFunc: func(old, obj interface{}) {
-			log.Printf("haha: %v", obj.(*corev1.Pod).Name)
+			log.Info("got pod update", "object name", obj.(*corev1.Pod).Name)
 		},
 	})
 

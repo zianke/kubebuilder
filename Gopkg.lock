@@ -255,6 +255,41 @@
   revision = "4c012f6dcd9546820e378d0bdda4d8fc772cdfea"
 
 [[projects]]
+  branch = "features/structed"
+  name = "github.com/thockin/logr"
+  packages = [
+    ".",
+    "impls/zaplogr"
+  ]
+  revision = "00c7b4e267c438d61694609660f3dcf8c8623b74"
+  source = "https://github.com/directxman12/logr.git"
+
+[[projects]]
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
+
+[[projects]]
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
+  revision = "eeedf312bc6c57391d84767a4cd413f02a917974"
+  version = "v1.8.0"
+
+[[projects]]
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "81e90905daefcd6fd217b62423c0908922eadb30"
@@ -646,6 +681,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "31fa988089e365ca737e64275be055689b3ad132f0b265e17fd5306de2d9777c"
+  inputs-digest = "803d10c401a2795f6e4dc681be7a1914a6031263ec5f056eaf648b2466f68b7e"
   solver-name = "gps-cdcl"
   solver-version = 1
