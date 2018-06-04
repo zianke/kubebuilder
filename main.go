@@ -4,7 +4,7 @@ import (
 	"os"
 	"flag"
 
-	klog "github.com/kubernetes-sigs/kubebuilder/pkg/log"
+	logf "github.com/kubernetes-sigs/kubebuilder/pkg/log"
 	kcache "k8s.io/client-go/tools/cache" // $cashmoney
 	corev1 "k8s.io/api/core/v1"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/informer"
@@ -30,7 +30,9 @@ func main() {
 	}
 	discoMapper := discovery.NewRESTMapper(groupReses, dynamic.VersionInterfaces)*/
 
-	log := klog.BaseLogger().WithName("main")
+	log := logf.Log.WithName("main")
+	logf.SetLogger(logf.ZapLogger(true))
+	log.Info("initializing...")
 
 	cache := &informer.IndexedCache{}
 	podInformer, err := cache.InformerFor(&corev1.Pod{})

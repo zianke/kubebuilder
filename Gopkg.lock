@@ -259,9 +259,10 @@
   name = "github.com/thockin/logr"
   packages = [
     ".",
-    "impls/zaplogr"
+    "impls/zaplogr",
+    "testing"
   ]
-  revision = "00c7b4e267c438d61694609660f3dcf8c8623b74"
+  revision = "087cf386d618a79ac96d86ba65fa7d0c44fce2a3"
   source = "https://github.com/directxman12/logr.git"
 
 [[projects]]
@@ -681,6 +682,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "803d10c401a2795f6e4dc681be7a1914a6031263ec5f056eaf648b2466f68b7e"
+  inputs-digest = "a9f4d6a4a2ddefbe0d84b5a8567d6b43a2904fef809fdd97d469a924e550913f"
   solver-name = "gps-cdcl"
   solver-version = 1
