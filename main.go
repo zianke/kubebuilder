@@ -1,53 +1,59 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
-	"github.com/kubernetes-sigs/kubebuilder/pkg/informer"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/client"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl/eventhandler"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl/reconcile"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl/source"
 	logf "github.com/kubernetes-sigs/kubebuilder/pkg/log"
 	corev1 "k8s.io/api/core/v1"
-	kcache "k8s.io/client-go/tools/cache" // $cashmoney
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
+var log = logf.Log.WithName("main")
+
 func main() {
+	// Init main
 	flag.Parse()
-
-	/*
-		cfg, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
-		if err != nil {
-			log.Error(err, "could not initialize kubernetes client")
-			os.Exit(1)
-		}
-
-		// NB: this should really only be done once for improved startup time
-
-		discoClient := discovery.NewDiscoveryClientForConfigOrDie(cfg)
-		groupReses, err := discovery.GetAPIGroupResources(discoClient)
-		if err != nil {
-			log.Error(err, "could not fetch API discovery information")
-			os.Exit(1)
-		}
-		discoMapper := discovery.NewRESTMapper(groupReses, dynamic.VersionInterfaces)*/
-
-	log := logf.Log.WithName("main")
 	logf.SetLogger(logf.ZapLogger(true))
-	log.Info("initializing...")
 
-	cache := &informer.SelfPopulatingInformers{}
-	podInformer, err := cache.InformerFor(&corev1.Pod{})
-	if err != nil {
-		log.Error(err, "could not initialize informer", "kind", "Pod")
-		os.Exit(1)
+	// Init Controller
+	c := &ctrl.Controller{
+		Reconcile: reconcile.ReconcileFunc(func(request reconcile.ReconcileRequest) (reconcile.ReconcileResult, error) {
+			log.Info("Got Reconcile", "Request", request)
+			return reconcile.ReconcileResult{}, nil
+		}),
 	}
-
-	go cache.Start(make(chan struct{}))
-
-	podInformer.AddEventHandler(kcache.ResourceEventHandlerFuncs{
-		UpdateFunc: func(old, obj interface{}) {
-			log.Info("got pod update", "object name", obj.(*corev1.Pod).Name)
-		},
+	cm := &ctrl.ControllerManager{}
+	cm.AddController(c, func() {
+		c.Watch(&source.KindSource{Type: &corev1.Endpoints{}}, &eventhandler.EnqueueHandler{})
+		c.Client.IndexField("synthetic.targets", &corev1.Endpoints{}, func(obj runtime.Object) []string {
+			ep := obj.(*corev1.Endpoints)
+			var res []string
+			for _, subset := range ep.Subsets {
+				for _, addr := range subset.Addresses {
+					res = append(res, addr.TargetRef.Name)
+				}
+			}
+			return res
+		})
+		c.Watch(&source.KindSource{Type: &corev1.Pod{}}, &eventhandler.EnqueueMappedHandler{
+			ToRequests: eventhandler.ToRequestsFunc(func(evt eventhandler.ToRequestArg) []reconcile.ReconcileRequest {
+				pods := &corev1.PodList{}
+				c.Client.List(context.TODO(), client.MatchingField("synthetic.targets", evt.Meta.GetName()), pods)
+				return nil
+			}),
+		})
 	})
 
-	select {}
+	// Start main
+	if err := cm.Start(make(chan struct{})); err != nil {
+		log.Error(err, "Failed to Start ControllerManager")
+		os.Exit(1)
+	}
 }
