@@ -50,7 +50,7 @@ func main() {
 			return res
 		})
 		c.Watch(&source.KindSource{Type: &corev1.Pod{}}, &eventhandler.EnqueueMappedHandler{
-			ToRequests: eventhandler.ToRequestsFunc(func(evt eventhandler.ToRequestArg) []reconcile.ReconcileRequest {
+			ToRequests: eventhandler.ToRequestsFunc(func(evt eventhandler.MapObject) []reconcile.ReconcileRequest {
 				pods := &corev1.PodList{}
 				c.Client.List(context.TODO(), client.MatchingField("synthetic.targets", evt.Meta.GetName()), pods)
 				return nil
