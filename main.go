@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/kubernetes-sigs/kubebuilder/pkg/client"
+	"github.com/kubernetes-sigs/kubebuilder/pkg/config"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl/eventhandler"
 	"github.com/kubernetes-sigs/kubebuilder/pkg/ctrl/reconcile"
@@ -29,7 +30,13 @@ func main() {
 			return reconcile.ReconcileResult{}, nil
 		}),
 	}
-	cm := &ctrl.ControllerManager{}
+	cfg, err := config.GetConfig()
+	if err != nil || cfg == nil {
+		log.Error(err, "Could not get a rest.Config")
+	}
+	cm := &ctrl.ControllerManager{
+		Config: cfg,
+	}
 	cm.AddController(c, func() {
 		c.Watch(&source.KindSource{Type: &corev1.Endpoints{}}, &eventhandler.EnqueueHandler{})
 		c.FieldIndexes.IndexField(&corev1.Endpoints{}, "synthetic.targets", func(obj runtime.Object) []string {
