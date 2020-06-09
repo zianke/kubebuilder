@@ -83,6 +83,9 @@ type Options struct {
 
 	// Namespaced is true if the resource is namespaced.
 	Namespaced bool
+
+	// Package is the Go package to import resource
+	Package string
 }
 
 // Validate verifies that all the fields have valid values
@@ -179,7 +182,10 @@ func (opts *Options) NewResource(c *config.Config, doResource bool) *Resource {
 	// TODO: need to support '--resource-pkg-path' flag for specifying resourcePath
 	if !doResource {
 		if !c.HasResource(opts.GVK()) {
-			if coreDomain, found := coreGroups[opts.Group]; found {
+			if opts.Package != "" {
+				pkg = opts.Package
+				domain = ""
+			} else if coreDomain, found := coreGroups[opts.Group]; found {
 				pkg = replacer.Replace(path.Join("k8s.io", "api", "%[group]", "%[version]"))
 				domain = coreDomain
 			}

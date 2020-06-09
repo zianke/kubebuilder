@@ -116,6 +116,7 @@ func (p *createAPIPlugin) BindFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&p.resource.Group, "group", "", "resource Group")
 	fs.StringVar(&p.resource.Version, "version", "", "resource Version")
 	fs.BoolVar(&p.resource.Namespaced, "namespaced", true, "resource is namespaced")
+	fs.StringVar(&p.resource.Package, "resource-pkg", "", "package to import resource")
 }
 
 func (p *createAPIPlugin) InjectConfig(c *config.Config) {
